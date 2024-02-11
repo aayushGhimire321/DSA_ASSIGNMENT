@@ -28,43 +28,31 @@
 // engines using the available engineers while considering the time cost of splitting.
 
 
-import java.util.PriorityQueue;
-
 public class MinTimeToBuildEngines {
-
     public static int minTimeToBuildEngines(int[] engines, int splitCost) {
-        // Use a min-heap to prioritize the tasks based on their time requirements
-        PriorityQueue<Integer> pq = new PriorityQueue<>();
-
-        // Add all engine building times to the priority queue
-        for (int engine : engines) {
-            pq.offer(engine);
-        }
-
         int totalTime = 0;
+        int engineers = 1;
 
-        while (pq.size() > 1) {
-            // Pop two tasks from the priority queue
-            int task1 = pq.poll();
-            int task2 = pq.poll();
+        for (int i = engines.length - 1; i >= 0; i--) {
+            int timeToBuild = engines[i];
 
-            // Calculate the time required to complete the two tasks
-            int time = task1 + task2 + splitCost;
-
-            // Add the time to the total time
-            totalTime += time;
-
-            // Add the combined task time back to the priority queue
-            pq.offer(time);
+            // Check if splitting an engineer is more efficient
+            if (engineers * splitCost < timeToBuild) {
+                // Split an engineer
+                engineers *= 2;
+                totalTime += splitCost;
+            } else {
+                // Assign an engineer to build the engine
+                totalTime += timeToBuild;
+            }
         }
 
-        // The remaining task in the priority queue is the total time required to build all engines
-        return totalTime + pq.poll();
+        return totalTime;
     }
 
     public static void main(String[] args) {
-        int[] engines = {3, 4, 5, 2};
-        int splitCost = 2;
-        System.out.println(minTimeToBuildEngines(engines, splitCost)); 
+        int[] engines = {1, 2, 3};
+        int splitCost = 1;
+        System.out.println(minTimeToBuildEngines(engines, splitCost)); // Output: 4
     }
 }
