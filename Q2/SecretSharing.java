@@ -18,31 +18,32 @@
 
 package Q2;
 
-public class MinTimeToBuildEngines {
-    public static int minTimeToBuildEngines(int[] engines, int splitCost) {
-        int totalTime = 0;
-        int engineers = 1;
+import java.util.HashSet;
+import java.util.Set;
 
-        for (int i = engines.length - 1; i >= 0; i--) {
-            int timeToBuild = engines[i];
+public class SecretSharing {
+    public static Set<Integer> secretSharing(int n, int[][] intervals, int firstPerson) {
+        Set<Integer> knownSet = new HashSet<>();
+        knownSet.add(firstPerson);
 
-            // Check if splitting an engineer is more efficient
-            if (engineers * splitCost < timeToBuild) {
-                // Split an engineer
-                engineers *= 2;
-                totalTime += splitCost;
-            } else {
-                // Assign an engineer to build the engine
-                totalTime += timeToBuild;
+        for (int[] interval : intervals) {
+            int start = interval[0];
+            int end = interval[1];
+
+            for (int person = start; person <= end; person++) {
+                knownSet.add(person);
             }
         }
 
-        return totalTime;
+        return knownSet;
     }
 
     public static void main(String[] args) {
-        int[] engines = {1, 2, 3};
-        int splitCost = 1;
-        System.out.println(minTimeToBuildEngines(engines, splitCost)); // Output: 4
+        int n = 5;
+        int[][] intervals = {{0, 2}, {1, 3}, {2, 4}};
+        int firstPerson = 0;
+
+        Set<Integer> knownSet = secretSharing(n, intervals, firstPerson);
+        System.out.println(knownSet); // Output: [0, 1, 2, 3, 4]
     }
 }
