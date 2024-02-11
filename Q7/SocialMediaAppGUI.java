@@ -209,11 +209,13 @@ public class SocialMediaAppGUI extends JFrame {
         sortedContent.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
 
         // Filter content based on user's network influence
-        Set<String> connections = socialNetworkGraph.getConnections(user);
-        java.util.List<String> recommendedContent = sortedContent.stream()
-                .filter(entry -> connections.contains(entry.getKey()))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        // Filter content based on user's network influence
+Set<String> connections = socialNetworkGraph.getConnections(user);
+java.util.List<String> recommendedContent = sortedContent.stream()
+        .filter(entry -> connections != null && connections.contains(entry.getKey())) // Add null check
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toList());
+
 
         // Return top recommendation or a random recommendation if no connection-based content is found
         if (!recommendedContent.isEmpty()) {
