@@ -5,12 +5,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SocialMediaAppGUI extends JFrame {
     private JTextArea feedTextArea;
     private JTextArea userProfileTextArea;
     private Graph socialNetworkGraph;
     private Map<String, Integer> userInteractions;
+    private Map<String, Integer> contentPopularity; // Added contentPopularity
 
     public SocialMediaAppGUI() {
         setTitle("Social Media App");
@@ -20,6 +22,13 @@ public class SocialMediaAppGUI extends JFrame {
         // Initialize the social network graph and user interactions map
         socialNetworkGraph = new Graph();
         userInteractions = new HashMap<>();
+        contentPopularity = new HashMap<>(); // Initialize contentPopularity
+
+        // Simulated data for demonstration (moved here from generateContentRecommendation method)
+        contentPopularity.put("Funny Cat Video", 100);
+        contentPopularity.put("Cooking Tutorial", 80);
+        contentPopularity.put("Travel Vlog", 60);
+        contentPopularity.put("DIY Crafts", 50);
 
         // Create main feed
         feedTextArea = new JTextArea(20, 30);
@@ -37,6 +46,13 @@ public class SocialMediaAppGUI extends JFrame {
         // Create user interaction buttons
         JButton followButton = new JButton("Follow");
         JButton createAccountButton = new JButton("Create Account");
+
+        // Create recommendation button
+        JButton recommendButton = new JButton("Recommend Content");
+
+        // Create feedback buttons
+        JButton likeRecommendedButton = new JButton("Like Recommended");
+        JButton dislikeRecommendedButton = new JButton("Dislike Recommended");
 
         // Layout setup
         JPanel mainPanel = new JPanel();
@@ -59,10 +75,19 @@ public class SocialMediaAppGUI extends JFrame {
         userInteractionPanel.add(followButton);
         userInteractionPanel.add(createAccountButton);
 
+        JPanel recommendPanel = new JPanel();
+        recommendPanel.add(recommendButton);
+
+        JPanel feedbackPanel = new JPanel();
+        feedbackPanel.add(likeRecommendedButton);
+        feedbackPanel.add(dislikeRecommendedButton);
+
         mainPanel.add(feedPanel, BorderLayout.CENTER);
         mainPanel.add(profilePanel, BorderLayout.WEST);
         mainPanel.add(interactionPanel, BorderLayout.SOUTH);
         mainPanel.add(userInteractionPanel, BorderLayout.NORTH);
+        mainPanel.add(recommendPanel, BorderLayout.EAST);
+        mainPanel.add(feedbackPanel, BorderLayout.PAGE_END);
 
         add(mainPanel);
         setVisible(true);
@@ -119,6 +144,36 @@ public class SocialMediaAppGUI extends JFrame {
                 }
             }
         });
+
+        // Action listener for recommendation button
+        recommendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Implement action for recommend button
+                String recommendedContent = generateContentRecommendation(userProfileTextArea.getText());
+                feedTextArea.append("Recommended Content: " + recommendedContent + "\n");
+            }
+        });
+
+        // Action listener for like recommended button
+        likeRecommendedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Implement action for like recommended button
+                String recommendedContent = feedTextArea.getText().replace("Recommended Content: ", "");
+                feedTextArea.append("Liked Recommended Content: " + recommendedContent + "\n");
+            }
+        });
+
+        // Action listener for dislike recommended button
+        dislikeRecommendedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Implement action for dislike recommended button
+                String recommendedContent = feedTextArea.getText().replace("Recommended Content: ", "");
+                feedTextArea.append("Disliked Recommended Content: " + recommendedContent + "\n");
+            }
+        });
     }
 
     // Record user interaction
@@ -137,6 +192,37 @@ public class SocialMediaAppGUI extends JFrame {
         userProfileTextArea.setText(profileText.toString());
     }
 
+    // Generate content recommendation based on user profile
+    private String generateContentRecommendation(String user) {
+        // Calculate content scores based on user preferences and content popularity
+        Map<String, Integer> contentScores = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : contentPopularity.entrySet()) {
+            String content = entry.getKey();
+            int popularity = entry.getValue();
+            int preference = userInteractions.getOrDefault(content, 0); // Using userInteractions instead of simulated userPreferences
+            int score = popularity * preference;
+            contentScores.put(content, score);
+        }
+
+        // Sort content by score in descending order
+        java.util.List<Map.Entry<String, Integer>> sortedContent = new ArrayList<>(contentScores.entrySet());
+        sortedContent.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+        // Filter content based on user's network influence
+        Set<String> connections = socialNetworkGraph.getConnections(user);
+        java.util.List<String> recommendedContent = sortedContent.stream()
+                .filter(entry -> connections.contains(entry.getKey()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // Return top recommendation or a random recommendation if no connection-based content is found
+        if (!recommendedContent.isEmpty()) {
+            return recommendedContent.get(0);
+        } else {
+            return sortedContent.get(0).getKey(); // Fallback to top recommendation
+        }
+    }
+
     // Graph data structure representing the social network
     class Graph {
         private Map<String, Set<String>> adjacencyMap;
@@ -150,6 +236,8 @@ public class SocialMediaAppGUI extends JFrame {
         }
 
         public void addConnection(String user1, String user2) {
+            adjacencyMap.putIfAbsent(user1, new HashSet<>());
+            adjacencyMap.putIfAbsent(user2, new HashSet<>());
             adjacencyMap.get(user1).add(user2);
             adjacencyMap.get(user2).add(user1); // Assuming a bidirectional connection
         }
