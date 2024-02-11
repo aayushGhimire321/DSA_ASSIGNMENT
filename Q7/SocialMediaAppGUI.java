@@ -10,14 +10,16 @@ public class SocialMediaAppGUI extends JFrame {
     private JTextArea feedTextArea;
     private JTextArea userProfileTextArea;
     private Graph socialNetworkGraph;
+    private Map<String, Integer> userInteractions;
 
     public SocialMediaAppGUI() {
         setTitle("Social Media App");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        // Initialize the social network graph
+        // Initialize the social network graph and user interactions map
         socialNetworkGraph = new Graph();
+        userInteractions = new HashMap<>();
 
         // Create main feed
         feedTextArea = new JTextArea(20, 30);
@@ -71,6 +73,7 @@ public class SocialMediaAppGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // Implement action for like button
                 feedTextArea.append("Liked the post!\n");
+                recordInteraction("Like");
             }
         });
 
@@ -79,6 +82,7 @@ public class SocialMediaAppGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // Implement action for comment button
                 feedTextArea.append("Commented on the post!\n");
+                recordInteraction("Comment");
             }
         });
 
@@ -87,6 +91,7 @@ public class SocialMediaAppGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 // Implement action for share button
                 feedTextArea.append("Shared the post!\n");
+                recordInteraction("Share");
             }
         });
 
@@ -98,6 +103,7 @@ public class SocialMediaAppGUI extends JFrame {
                 String followedUser = JOptionPane.showInputDialog("Enter username to follow:");
                 if (followedUser != null && !followedUser.isEmpty()) {
                     socialNetworkGraph.addConnection(userProfileTextArea.getText(), followedUser);
+                    recordInteraction("Follow");
                 }
             }
         });
@@ -109,9 +115,26 @@ public class SocialMediaAppGUI extends JFrame {
                 String username = JOptionPane.showInputDialog("Enter username to create an account:");
                 if (username != null && !username.isEmpty()) {
                     socialNetworkGraph.addUser(username);
+                    recordInteraction("Create Account");
                 }
             }
         });
+    }
+
+    // Record user interaction
+    private void recordInteraction(String interaction) {
+        userInteractions.put(interaction, userInteractions.getOrDefault(interaction, 0) + 1);
+        updateProfileTextArea();
+    }
+
+    // Update user profile text area based on user interactions
+    private void updateProfileTextArea() {
+        StringBuilder profileText = new StringBuilder();
+        profileText.append("User Profile:\n");
+        for (Map.Entry<String, Integer> entry : userInteractions.entrySet()) {
+            profileText.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+        }
+        userProfileTextArea.setText(profileText.toString());
     }
 
     // Graph data structure representing the social network
