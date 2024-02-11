@@ -29,45 +29,39 @@
 
 
 package Q2;
-public class MinMovesToEqualizeDresses {
-
+public class EqualizeDresses {
     public static int minMovesToEqualize(int[] machines) {
         int totalDresses = 0;
         int n = machines.length;
 
-        for (int machine : machines) {
-            totalDresses += machine;
+        // Calculate the total number of dresses
+        for (int dresses : machines) {
+            totalDresses += dresses;
         }
 
         if (totalDresses % n != 0) {
-            // If the total number of dresses cannot be equally distributed among all machines, return -1
+            // Total dresses cannot be equally distributed
             return -1;
         }
 
-        int averageDresses = totalDresses / n;
+        // Calculate the desired number of dresses per machine
+        int targetDresses = totalDresses / n;
+
         int moves = 0;
-        int dressesToMove = 0;
+        int dressesSum = 0;
 
-        for (int i = 0; i < n; i++) {
-            // Calculate the dresses needed to equalize the current machine
-            dressesToMove += machines[i] - averageDresses;
-
-            // Update the maximum moves needed so far
-            moves = Math.max(moves, Math.max(Math.abs(dressesToMove), machines[i] - averageDresses));
-
-            // Update the dresses needed to equalize the next machine
-            if (i < n - 1) {
-                machines[i + 1] += dressesToMove;
-            }
+        // Iterate through the machines to equalize dresses
+        for (int dresses : machines) {
+            dressesSum += dresses;
+            int diff = dressesSum - targetDresses * (moves + 1); // Dresses difference from the target
+            moves = Math.max(moves, Math.max(Math.abs(diff), dresses)); // Update moves needed
         }
 
         return moves;
     }
 
     public static void main(String[] args) {
-        int[] machines = {2, 1, 3, 0, 2};
-        System.out.println(minMovesToEqualize(machines)); // Output: 5
+        int[] machines = {1, 0, 5};
+        System.out.println(minMovesToEqualize(machines)); // Output: 2
     }
 }
-
-
